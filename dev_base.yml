@@ -1,0 +1,113 @@
+# ansible playbook for a dev environment
+- name: Import account playbook
+  import_playbook: accounts.yml
+
+- name: Dev environment provisioning
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+
+      - name: Update apt cache
+        apt:
+            update_cache: yes
+
+      # Neovim repo
+      - apt_repository:
+            repo: ppa:neovim-ppa/stable
+            update_cache: true
+
+      - name: Install Packages
+        apt:
+            name: "{{ packages }}"
+        vars:
+            # Create a list of packages to install through apt here
+            packages:
+                - zsh
+                - software-properties-common
+                - python-pip
+                - python3-pip
+                - python3-venv
+                - python-dev
+                - python3-dev
+                - neovim
+                - git
+                - apt-transport-https
+                - ca-certificates
+                - curl
+                - gdb
+                - tmux
+                - binutils-x86-64-linux-gnu
+                - libssl-dev
+                - libffi-dev
+                - build-essential
+                - cmake
+                - exuberant-ctags
+                - powerline
+      # TODO: Only install these pip libraries as normal user
+      - name: Upgrade pip2
+        pip:
+            name: pip
+            extra_args: --upgrade
+            executable: pip2
+      - name: Upgrade pip3
+        pip:
+            name: pip
+            extra_args: --upgrade
+            executable: pip3
+
+      - name: Install pip2 libraries
+        pip:
+            name: "{{ packages }}"
+            state: latest
+            executable: pip2
+        vars:
+            packages:
+                - neovim
+                - virtualenv
+                - capstone
+                - ropper
+                - keystone-engine
+                - pwntools
+      - name: Install pip3 libraries
+        pip:
+            name: "{{ packages }}"
+            state: latest
+            executable: pip3
+        vars:
+            packages:
+                - neovim
+                - capstone
+                - virtualenv
+                - unicorn
+                - ropper
+                - keystone-engine
+                - pwntools
+      # Fix cannot import main bug for pip2 and pip3
+      - name: Fix local vars for pip
+        shell: hash -d pip pip2 pip3
+        ignore_errors: yes
+
+      # Install gef
+      - name: Download GEF
+        become: yes
+        become_user: asdf
+        get_url:
+            url: https://github.com/hugsy/gef/raw/master/scripts/gef.sh
+            dest: /tmp/gef.sh
+      # Install as normal user
+      - name: Install GEF
+        become: yes
+        become_user: asdf
+        shell: bash /tmp/gef.sh
+
+      # Download dotfiles from git
+      - name: Download dotfiles
+        become: yes
+        become_user: asdf
+        git:
+            repo: https://github.com/idontparty/octocop
+            dest: ~/octocop
+      # For now, run dotfiles.sh manually
+

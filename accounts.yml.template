@@ -1,0 +1,20 @@
+# See https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module
+# This playbook creats a user and sets the password, as well as changes the
+# password for root
+- name: User creation
+  hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+      # Create new user
+      - name: Create new user asdf
+        user:
+            name: asdf
+            password: <password>
+            shell: /bin/bash
+      # Set new pw for root
+      - name: Change password for root
+        user:
+            name: root
+            password: <password>
