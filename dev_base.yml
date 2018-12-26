@@ -91,23 +91,17 @@
 
       # Install gef
       - name: Download GEF
-        become: yes
-        become_user: asdf
         get_url:
             url: https://github.com/hugsy/gef/raw/master/scripts/gef.sh
             dest: /tmp/gef.sh
       # Install as normal user
       - name: Install GEF
-        become: yes
-        become_user: asdf
         shell: bash /tmp/gef.sh
 
       # Download dotfiles from git
       - name: Download dotfiles
-        become: yes
-        become_user: asdf
         git:
             repo: https://github.com/idontparty/octocop
-            dest: ~/octocop
+            dest: /tmp/octocop
       # For now, run dotfiles.sh manually
 
